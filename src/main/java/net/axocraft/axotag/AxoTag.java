@@ -14,6 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -128,7 +129,7 @@ public final class AxoTag extends JavaPlugin implements Listener {
         luckPerms.getGroupManager().saveGroup(group);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onChat(AsyncChatEvent event) {
         var user = luckPerms.getUserManager().getUser(event.getPlayer().getUniqueId());
         if (user == null) return;

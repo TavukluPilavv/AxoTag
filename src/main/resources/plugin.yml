@@ -1,0 +1,16 @@
+name: AxoTag
+version: 1.0.0
+main: net.axocraft.axotag.AxoTag
+api-version: '1.21'
+depend: [LuckPerms]
+author: AxoCraft
+description: LuckPerms group tags and chat colors.
+commands:
+  tagkomut:
+    description: AxoTag group tag and chat color settings
+    usage: /tagkomut <grup> <inceparlak|renk|chatrenk> ...
+    permission: axotag.admin
+permissions:
+  axotag.admin:
+    description: Allows managing AxoTag settings
+    default: op

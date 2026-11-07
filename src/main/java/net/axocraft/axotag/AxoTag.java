@@ -149,7 +149,7 @@ public final class AxoTag extends JavaPlugin implements Listener, TabCompleter {
 
     private void setPrefix(Group group, String prefix) {
         group.data().clear(node -> node instanceof MetaNode meta && meta.getMetaKey().equals("prefix"));
-        group.data().add(MetaNode.builder("prefix", prefix, 100).build());
+        group.data().add(MetaNode.builder("prefix", prefix).priority(100).build());
         luckPerms.getGroupManager().saveGroup(group);
     }
 

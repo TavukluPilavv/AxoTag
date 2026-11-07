@@ -7,7 +7,7 @@ import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.node.Node;
-import net.luckperms.api.node.types.MetaNode;
+import net.luckperms.api.node.types.PrefixNode;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -148,8 +148,8 @@ public final class AxoTag extends JavaPlugin implements Listener, TabCompleter {
     }
 
     private void setPrefix(Group group, String prefix) {
-        group.data().clear(node -> node instanceof MetaNode meta && meta.getMetaKey().equals("prefix"));
-        group.data().add(MetaNode.builder("prefix", prefix).priority(100).build());
+        group.data().clear(node -> node instanceof PrefixNode);
+        group.data().add(PrefixNode.builder(100, prefix).build());
         luckPerms.getGroupManager().saveGroup(group);
     }
 

@@ -2,11 +2,11 @@ package net.axocraft.axotag;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.group.Group;
-import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.PrefixNode;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -77,19 +77,25 @@ public final class AxoTag extends JavaPlugin implements Listener, TabCompleter {
             return true;
         }
         String action = args[1].toLowerCase(Locale.ROOT);
+        
         if (action.equals("inceparlak")) {
             boolean enabled = args[2].equalsIgnoreCase("aç") || args[2].equalsIgnoreCase("ac") || args[2].equalsIgnoreCase("on");
             if (!enabled) {
                 sender.sendMessage(Component.text("Kullanım: /tagkomut " + groupName + " inceparlak aç", NamedTextColor.YELLOW));
                 return true;
             }
-            NamedTextColor color = NamedTextColor.AQUA;
-            String prefix = legacy.serialize(Component.text("[" + group.getName() + "] ", color))
-                    + legacy.serialize(Component.text("", color));
+            // Görseldeki gibi küçük harf veya şık/ince görünüm için format düzenlemesi
+            String formattedName = group.getName().toLowerCase(Locale.ROOT);
+            Component tagComp = Component.text("[", NamedTextColor.DARK_GRAY)
+                    .append(Component.text(formattedName, NamedTextColor.AQUA, TextDecoration.BOLD))
+                    .append(Component.text("] ", NamedTextColor.DARK_GRAY));
+            
+            String prefix = legacy.serialize(tagComp);
             setPrefix(group, prefix);
             sender.sendMessage(Component.text(group.getName() + " tagı ince/parlak (aqua) yapıldı.", NamedTextColor.GREEN));
             return true;
         }
+        
         if (action.equals("renk")) {
             String colorName = String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length)).toLowerCase(Locale.ROOT);
             NamedTextColor color = colors.get(colorName);
@@ -97,11 +103,13 @@ public final class AxoTag extends JavaPlugin implements Listener, TabCompleter {
                 sender.sendMessage(Component.text("Renk bulunamadı. Örnek: mavi, kırmızı, mor, yeşil, sarı, aqua, beyaz.", NamedTextColor.RED));
                 return true;
             }
-            String prefix = legacy.serialize(Component.text("[" + group.getName() + "] ", color));
+            String formattedName = group.getName().toUpperCase(Locale.ROOT);
+            String prefix = legacy.serialize(Component.text("[" + formattedName + "] ", color));
             setPrefix(group, prefix);
             sender.sendMessage(Component.text(group.getName() + " tag rengi ayarlandı.", NamedTextColor.GREEN));
             return true;
         }
+        
         if (action.equals("chatrenk")) {
             if (args.length < 3) {
                 sender.sendMessage(Component.text("Kullanım: /tagkomut " + groupName + " chatrenk <renk> | chatrenk kapat", NamedTextColor.YELLOW));

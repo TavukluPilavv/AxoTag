@@ -2,7 +2,6 @@ package net.axocraft.axotag;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
@@ -84,13 +83,9 @@ public final class AxoTag extends JavaPlugin implements Listener, TabCompleter {
                 sender.sendMessage(Component.text("Kullanım: /tagkomut " + groupName + " inceparlak aç", NamedTextColor.YELLOW));
                 return true;
             }
-            // Görseldeki gibi küçük harf veya şık/ince görünüm için format düzenlemesi
-            String formattedName = group.getName().toLowerCase(Locale.ROOT);
-            Component tagComp = Component.text("[", NamedTextColor.DARK_GRAY)
-                    .append(Component.text(formattedName, NamedTextColor.AQUA, TextDecoration.BOLD))
-                    .append(Component.text("] ", NamedTextColor.DARK_GRAY));
-            
-            String prefix = legacy.serialize(tagComp);
+            // Kalınlık (Bold) kaldırıldı, yazı tipi ince ve şık hale getirildi. 
+            // &r eklenerek renk sızıntısı ve oyuncu adının gri olma sorunu engellendi.
+            String prefix = "&8[&b" + group.getName() + "&8] &r";
             setPrefix(group, prefix);
             sender.sendMessage(Component.text(group.getName() + " tagı ince/parlak (aqua) yapıldı.", NamedTextColor.GREEN));
             return true;
@@ -103,8 +98,8 @@ public final class AxoTag extends JavaPlugin implements Listener, TabCompleter {
                 sender.sendMessage(Component.text("Renk bulunamadı. Örnek: mavi, kırmızı, mor, yeşil, sarı, aqua, beyaz.", NamedTextColor.RED));
                 return true;
             }
-            String formattedName = group.getName().toUpperCase(Locale.ROOT);
-            String prefix = legacy.serialize(Component.text("[" + formattedName + "] ", color));
+            // Normal renk komutlarında da &r eklenerek isimlerin grileşmesi önlendi.
+            String prefix = legacy.serialize(Component.text("[" + group.getName() + "] ", color)) + "&r";
             setPrefix(group, prefix);
             sender.sendMessage(Component.text(group.getName() + " tag rengi ayarlandı.", NamedTextColor.GREEN));
             return true;
@@ -113,7 +108,7 @@ public final class AxoTag extends JavaPlugin implements Listener, TabCompleter {
         if (action.equals("chatrenk")) {
             if (args.length < 3) {
                 sender.sendMessage(Component.text("Kullanım: /tagkomut " + groupName + " chatrenk <renk> | chatrenk kapat", NamedTextColor.YELLOW));
-                return true;
+                return typeReturn(sender, group); // Yardımcı yapı veya true döndürme
             }
             String colorName = String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length)).toLowerCase(Locale.ROOT);
             if (colorName.equals("kapat") || colorName.equals("off")) {
@@ -124,7 +119,7 @@ public final class AxoTag extends JavaPlugin implements Listener, TabCompleter {
             }
             NamedTextColor color = colors.get(colorName);
             if (color == null) {
-                sender.sendMessage(Component.text("Renk bulunamadı. Türkçe renk adlarını kullanabilirsin: kırmızı, mavi, turuncu, açık mavi, kapalı mavi, açık kırmızı, kapalı kırmızı, mor, yeşil, sarı, beyaz, siyah, gri.", NamedTextColor.RED));
+                sender.sendMessage(Component.text("Renk bulunamadı.", NamedTextColor.RED));
                 return true;
             }
             getConfig().set("chat-colors." + group.getName(), color.toString());
@@ -132,7 +127,11 @@ public final class AxoTag extends JavaPlugin implements Listener, TabCompleter {
             sender.sendMessage(Component.text(group.getName() + " sohbet rengi " + colorName + " yapıldı.", NamedTextColor.GREEN));
             return true;
         }
-        sender.sendMessage(Component.text("Bilinmeyen işlem. inceparlak, renk veya chatrenk kullan.", NamedTextColor.RED));
+        sender.sendMessage(Component.text("Bilinmeyen işlem.", NamedTextColor.RED));
+        return true;
+    }
+
+    private boolean typeReturn(CommandSender sender, Group group) {
         return true;
     }
 

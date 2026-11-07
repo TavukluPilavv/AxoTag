@@ -11,6 +11,8 @@ import net.luckperms.api.node.types.MetaNode;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.util.StringUtil;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,7 +24,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.Locale;
 import java.util.Map;
 
-public final class AxoTag extends JavaPlugin implements Listener {
+public final class AxoTag extends JavaPlugin implements Listener, TabCompleter {
     private LuckPerms luckPerms;
     private final LegacyComponentSerializer legacy = LegacyComponentSerializer.legacyAmpersand();
     private final Map<String, NamedTextColor> colors = Map.ofEntries(
@@ -51,6 +53,7 @@ public final class AxoTag extends JavaPlugin implements Listener {
         saveDefaultConfig();
         luckPerms = LuckPermsProvider.get();
         Bukkit.getPluginManager().registerEvents(this, this);
+        getCommand("tagkomut").setTabCompleter(this);
         getLogger().info("AxoTag enabled.");
     }
 
@@ -65,6 +68,10 @@ public final class AxoTag extends JavaPlugin implements Listener {
         }
         String groupName = args[0];
         Group group = luckPerms.getGroupManager().getGroup(groupName);
+        if (group == null) {
+            group = luckPerms.getGroupManager().getLoadedGroups().stream()
+                    .filter(g -> g.getName().equalsIgnoreCase(groupName)).findFirst().orElse(null);
+        }
         if (group == null) {
             sender.sendMessage(Component.text("LuckPerms grubu bulunamadı: " + groupName, NamedTextColor.RED));
             return true;
@@ -119,6 +126,25 @@ public final class AxoTag extends JavaPlugin implements Listener {
         }
         sender.sendMessage(Component.text("Bilinmeyen işlem. inceparlak, renk veya chatrenk kullan.", NamedTextColor.RED));
         return true;
+    }
+
+    @Override
+    public java.util.List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (!sender.hasPermission("axotag.admin")) return java.util.Collections.emptyList();
+        java.util.List<String> suggestions = new java.util.ArrayList<>();
+        if (args.length == 1) {
+            for (Group group : luckPerms.getGroupManager().getLoadedGroups()) suggestions.add(group.getName());
+        } else if (args.length == 2) {
+            suggestions.add("inceparlak");
+            suggestions.add("renk");
+            suggestions.add("chatrenk");
+        } else if (args.length == 3 && args[1].equalsIgnoreCase("inceparlak")) {
+            suggestions.add("aç");
+        } else if (args.length >= 3 && (args[1].equalsIgnoreCase("renk") || args[1].equalsIgnoreCase("chatrenk"))) {
+            suggestions.addAll(colors.keySet());
+            if (args[1].equalsIgnoreCase("chatrenk")) suggestions.add("kapat");
+        }
+        return StringUtil.copyPartialMatches(args[args.length - 1], suggestions, new java.util.ArrayList<>());
     }
 
     private void setPrefix(Group group, String prefix) {
